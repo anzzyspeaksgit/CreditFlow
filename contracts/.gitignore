@@ -1,0 +1,12 @@
+# Compiler files
+cache/
+out/
+
+# Node
+node_modules/
+
+# Environment
+.env
+
+# Foundry
+broadcast/
