@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowRight, ShieldCheck, Briefcase, TrendingUp } from 'lucide-react';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 export default function Home() {
   return (
@@ -21,9 +22,7 @@ export default function Home() {
             Borrow
           </Link>
         </nav>
-        <button className="px-4 py-2 bg-black text-white rounded-md text-sm font-medium hover:bg-gray-800 transition-colors">
-          Connect Wallet
-        </button>
+        <ConnectButton />
       </header>
 
       <main className="flex-1">
