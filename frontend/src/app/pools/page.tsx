@@ -1,6 +1,9 @@
+"use client";
+
 import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 
 const mockPools = [
   {
@@ -34,13 +37,18 @@ const mockPools = [
 
 export default function PoolsPage() {
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="max-w-6xl mx-auto px-6 py-12"
+    >
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Lending Pools</h1>
           <p className="text-gray-500">Provide liquidity to institutional private credit deals.</p>
         </div>
-        <button className="bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100">
+        <button className="bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors">
           My Deposits
         </button>
       </div>
@@ -58,8 +66,14 @@ export default function PoolsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {mockPools.map(pool => (
-              <tr key={pool.id} className="hover:bg-gray-50 transition-colors">
+            {mockPools.map((pool, index) => (
+              <motion.tr 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.3 }}
+                key={pool.id} 
+                className="hover:bg-gray-50 transition-colors"
+              >
                 <td className="px-6 py-4">
                   <div className="font-bold text-gray-900">{pool.name}</div>
                   <div className="text-sm text-gray-500">{pool.borrower}</div>
@@ -82,16 +96,16 @@ export default function PoolsPage() {
                 <td className="px-6 py-4 text-right">
                   <Link 
                     href={`/pools/${pool.id}`}
-                    className="inline-flex items-center gap-1 text-sm font-semibold bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                    className="inline-flex items-center gap-1 text-sm font-semibold bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
                   >
                     Deposit <ArrowUpRight className="w-4 h-4" />
                   </Link>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
+    </motion.div>
   );
 }
