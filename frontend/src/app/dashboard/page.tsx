@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { DollarSign, Percent, Activity, ArrowRight } from 'lucide-react';
+import { DollarSign, Percent, Activity, ArrowRight, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useAccount, useReadContract } from 'wagmi';
 import CreditPoolABI from '../../abis/CreditPool.json';
@@ -19,6 +19,16 @@ export default function DashboardPage() {
     functionName: 'totalDeposits',
   });
 
+  const { data: totalBorrowed } = useReadContract({
+    address: POOL_ADDRESS,
+    abi: CreditPoolABI,
+    functionName: 'totalBorrowed',
+  });
+
+  const tvl = totalDeposits ? Number(formatUnits(totalDeposits as bigint, 18)) : 0;
+  const borrowed = totalBorrowed ? Number(formatUnits(totalBorrowed as bigint, 18)) : 0;
+  const utilization = tvl > 0 ? ((borrowed / tvl) * 100).toFixed(1) : "0.0";
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -26,9 +36,17 @@ export default function DashboardPage() {
       transition={{ duration: 0.5 }}
       className="max-w-6xl mx-auto px-6 py-12"
     >
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Lender Dashboard</h1>
-        <p className="text-gray-500">Track your private credit investments and yields.</p>
+      <div className="mb-8 flex justify-between items-end">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Lender Dashboard</h1>
+          <p className="text-gray-500">Track your private credit investments and yields.</p>
+        </div>
+        <div className="flex gap-4">
+          <div className="bg-blue-50 border border-blue-100 px-4 py-2 rounded-lg flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-blue-600" />
+            <span className="text-sm font-semibold text-blue-800">KYC Verified</span>
+          </div>
+        </div>
       </div>
 
       {!isConnected ? (
@@ -41,10 +59,10 @@ export default function DashboardPage() {
         </motion.div>
       ) : (
         <>
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
+          <div className="grid md:grid-cols-4 gap-6 mb-12">
             <motion.div 
               whileHover={{ y: -5 }}
-              className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 transition-all"
+              className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 transition-all col-span-1"
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-gray-500 font-medium">Total Supplied</h3>
@@ -53,13 +71,13 @@ export default function DashboardPage() {
                 </div>
               </div>
               <p className="text-3xl font-bold">
-                ${totalDeposits ? formatUnits(totalDeposits as bigint, 18) : "0.00"}
+                ${tvl > 0 ? tvl.toFixed(2) : "0.00"}
               </p>
             </motion.div>
 
             <motion.div 
               whileHover={{ y: -5 }}
-              className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 transition-all"
+              className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 transition-all col-span-1"
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-gray-500 font-medium">Total Interest Earned</h3>
@@ -72,7 +90,7 @@ export default function DashboardPage() {
 
             <motion.div 
               whileHover={{ y: -5 }}
-              className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 transition-all"
+              className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 transition-all col-span-1"
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-gray-500 font-medium">Active Positions</h3>
@@ -81,6 +99,19 @@ export default function DashboardPage() {
                 </div>
               </div>
               <p className="text-3xl font-bold">1 Pool</p>
+            </motion.div>
+
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="bg-gray-900 text-white p-6 rounded-xl shadow-sm border border-gray-800 transition-all col-span-1"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-gray-400 font-medium">Global Utilization</h3>
+              </div>
+              <p className="text-3xl font-bold mb-2">{utilization}%</p>
+              <div className="w-full bg-gray-800 rounded-full h-2">
+                <div className="bg-green-400 h-2 rounded-full" style={{ width: `${utilization}%` }}></div>
+              </div>
             </motion.div>
           </div>
 
@@ -107,7 +138,7 @@ export default function DashboardPage() {
                       <div className="text-sm text-gray-500">InvoiceX Global</div>
                     </td>
                     <td className="px-6 py-4 font-medium">
-                      ${totalDeposits ? formatUnits(totalDeposits as bigint, 18) : "0.00"}
+                      ${tvl > 0 ? tvl.toFixed(2) : "0.00"}
                     </td>
                     <td className="px-6 py-4">12.5%</td>
                     <td className="px-6 py-4 text-right">
