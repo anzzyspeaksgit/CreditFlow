@@ -4,13 +4,25 @@ import React, { useState } from 'react';
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
 import CreditPoolABI from '../../../abis/CreditPool.json';
-import { ShieldCheck, TrendingUp, AlertCircle } from 'lucide-react';
+import { ShieldCheck, TrendingUp, AlertCircle, BarChart3 } from 'lucide-react';
 
 const POOL_ADDRESS = "0x0000000000000000000000000000000000000000"; // Placeholder
 
 export default function PoolDetailsPage({ params }: { params: { id: string } }) {
   const { isConnected } = useAccount();
   const [amount, setAmount] = useState('');
+
+  const { data: totalDeposits } = useReadContract({
+    address: POOL_ADDRESS,
+    abi: CreditPoolABI,
+    functionName: 'totalDeposits',
+  });
+
+  const { data: totalBorrowed } = useReadContract({
+    address: POOL_ADDRESS,
+    abi: CreditPoolABI,
+    functionName: 'totalBorrowed',
+  });
 
   const { data: hash, writeContract, isPending } = useWriteContract();
   
@@ -30,6 +42,10 @@ export default function PoolDetailsPage({ params }: { params: { id: string } }) 
       args: [parseUnits(amount, 18)],
     });
   };
+
+  const tvl = totalDeposits ? Number(formatUnits(totalDeposits as bigint, 18)) : 0;
+  const borrowed = totalBorrowed ? Number(formatUnits(totalBorrowed as bigint, 18)) : 0;
+  const utilization = tvl > 0 ? ((borrowed / tvl) * 100).toFixed(1) : "0.0";
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
@@ -88,7 +104,7 @@ export default function PoolDetailsPage({ params }: { params: { id: string } }) 
                 </button>
                 
                 {isConfirmed && (
-                  <div className="bg-green-50 text-green-800 p-3 rounded-lg text-sm font-medium text-center">
+                  <div className="bg-green-50 text-green-800 p-3 rounded-lg text-sm font-medium text-center border border-green-200 mt-4">
                     Deposit successful! Shares minted.
                   </div>
                 )}
@@ -99,6 +115,20 @@ export default function PoolDetailsPage({ params }: { params: { id: string } }) 
           <div className="p-8">
             <h3 className="text-lg font-bold mb-6">Pool Highlights</h3>
             <div className="space-y-6">
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
+                  <BarChart3 className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900">Capital Utilization: {utilization}%</h4>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div className="bg-purple-600 h-2 rounded-full" style={{ width: `${utilization}%` }}></div>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">
+                    High utilization indicates active borrowing and consistent yield generation.
+                  </p>
+                </div>
+              </div>
               <div className="flex gap-4">
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-5 h-5 text-blue-600" />
