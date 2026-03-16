@@ -3,33 +3,52 @@
 @tailwind utilities;
 
 :root {
-  --background: #0f172a;
+  --background: #020617;
   --foreground: #f8fafc;
 }
 
 body {
   color: var(--foreground);
-  background: radial-gradient(circle at top right, #1e293b, #020617);
+  background: radial-gradient(ellipse at top right, #1e1b4b 0%, #0f172a 50%, #020617 100%);
   background-attachment: fixed;
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   min-height: 100vh;
 }
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 .premium-button {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
 }
 .premium-button:hover {
-  box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
   transform: translateY(-2px);
+}
+
+/* Base table overrides for dark theme */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+th {
+  background: rgba(255, 255, 255, 0.02);
+  color: #94a3b8;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
 }
