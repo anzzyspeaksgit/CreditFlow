@@ -2,21 +2,63 @@
 
 import React, { useState } from 'react';
 import { ShieldCheck, UserCheck, AlertTriangle, Users } from 'lucide-react';
+import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi';
+import CreditPoolABI from '../../../abis/CreditPool.json';
+import { CONTRACT_ADDRESSES } from '../../../config/contracts';
 
 export default function AdminDashboard() {
+  const { address } = useAccount();
   const [approving, setApproving] = useState<string | null>(null);
+  
+  // Real implementation: We'd likely have a backend or subgraph feeding us the list of borrowers.
+  // For the hackathon demo, we hardcode the list and tie the actions to on-chain calls.
+  // We'll allow the admin to approve the "Acme Corp" dummy borrower.
+  const MOCK_BORROWER_ADDRESS = "0x0000000000000000000000000000000000000001"; // Generic mock
 
-  const borrowers = [
-    { id: '1', name: 'InvoiceX Global', reg: 'UK-928374', limit: '$1,250,000', status: 'Approved' },
-    { id: '2', name: 'PropFrac Capital', reg: 'US-102938', limit: '$800,000', status: 'Approved' },
-    { id: '3', name: 'Acme Corp', reg: 'SG-882233', limit: '$500,000', status: 'Pending Review' },
-  ];
+  const [borrowers, setBorrowers] = useState([
+    { id: '1', name: 'InvoiceX Global', reg: 'UK-928374', limit: '$1,250,000', status: 'Approved', address: '0x123...' },
+    { id: '2', name: 'PropFrac Capital', reg: 'US-102938', limit: '$800,000', status: 'Approved', address: '0x456...' },
+    { id: '3', name: 'Acme Corp', reg: 'SG-882233', limit: '$500,000', status: 'Pending Review', address: MOCK_BORROWER_ADDRESS },
+  ]);
 
-  const handleApprove = (id: string) => {
-    setApproving(id);
-    setTimeout(() => {
+  const { data: hash, writeContractAsync } = useWriteContract();
+
+  const handleApprove = async (id: string, borrowerAddress: string) => {
+    try {
+      setApproving(id);
+      await writeContractAsync({
+        address: CONTRACT_ADDRESSES.CREDIT_POOL,
+        abi: CreditPoolABI,
+        functionName: 'approveBorrower',
+        args: [borrowerAddress, true],
+      });
+      
+      // Optimistically update UI
+      setBorrowers(prev => prev.map(b => b.id === id ? { ...b, status: 'Approved' } : b));
       setApproving(null);
-    }, 2000);
+    } catch (error) {
+      console.error(error);
+      setApproving(null);
+    }
+  };
+
+  const handleRevoke = async (id: string, borrowerAddress: string) => {
+    try {
+      setApproving(id);
+      await writeContractAsync({
+        address: CONTRACT_ADDRESSES.CREDIT_POOL,
+        abi: CreditPoolABI,
+        functionName: 'approveBorrower',
+        args: [borrowerAddress, false],
+      });
+      
+      // Optimistically update UI
+      setBorrowers(prev => prev.map(b => b.id === id ? { ...b, status: 'Pending Review' } : b));
+      setApproving(null);
+    } catch (error) {
+      console.error(error);
+      setApproving(null);
+    }
   };
 
   return (
@@ -36,7 +78,9 @@ export default function AdminDashboard() {
               <UserCheck className="w-5 h-5 text-green-600" />
             </div>
           </div>
-          <p className="text-3xl font-bold">2</p>
+          <p className="text-3xl font-bold">
+            {borrowers.filter(b => b.status === 'Approved').length}
+          </p>
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
@@ -46,7 +90,9 @@ export default function AdminDashboard() {
               <Users className="w-5 h-5 text-yellow-600" />
             </div>
           </div>
-          <p className="text-3xl font-bold">1</p>
+          <p className="text-3xl font-bold">
+            {borrowers.filter(b => b.status === 'Pending Review').length}
+          </p>
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
@@ -88,15 +134,19 @@ export default function AdminDashboard() {
                 <td className="px-6 py-4 text-right">
                   {b.status === 'Pending Review' ? (
                     <button 
-                      onClick={() => handleApprove(b.id)}
+                      onClick={() => handleApprove(b.id, b.address)}
                       disabled={approving === b.id}
                       className="text-sm font-semibold bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 disabled:opacity-50"
                     >
-                      {approving === b.id ? 'Approving...' : 'Approve Borrower'}
+                      {approving === b.id ? 'Confirming in Wallet...' : 'Approve Borrower'}
                     </button>
                   ) : (
-                    <button className="text-sm font-semibold border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 text-red-600 hover:text-red-700">
-                      Revoke
+                    <button 
+                      onClick={() => handleRevoke(b.id, b.address)}
+                      disabled={approving === b.id}
+                      className="text-sm font-semibold border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 text-red-600 hover:text-red-700 disabled:opacity-50"
+                    >
+                      {approving === b.id ? 'Processing...' : 'Revoke'}
                     </button>
                   )}
                 </td>
@@ -104,6 +154,9 @@ export default function AdminDashboard() {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="text-center text-sm text-gray-500">
+        <p>Note: In a production environment, this dashboard is heavily restricted via OpenZeppelin's `AccessControl` and `Ownable` contracts.</p>
       </div>
     </div>
   );
