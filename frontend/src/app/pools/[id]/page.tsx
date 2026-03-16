@@ -12,10 +12,10 @@ export default function PoolDetailsPage({ params }: { params: { id: string } }) 
   const { isConnected } = useAccount();
   const [amount, setAmount] = useState('');
 
-  const { data: totalDeposits } = useReadContract({
+  const { data: totalAssets } = useReadContract({
     address: POOL_ADDRESS,
     abi: CreditPoolABI,
-    functionName: 'totalDeposits',
+    functionName: 'totalAssets',
   });
 
   const { data: totalBorrowed } = useReadContract({
@@ -43,7 +43,7 @@ export default function PoolDetailsPage({ params }: { params: { id: string } }) 
     });
   };
 
-  const tvl = totalDeposits ? Number(formatUnits(totalDeposits as bigint, 18)) : 0;
+  const tvl = totalAssets ? Number(formatUnits(totalAssets as bigint, 18)) : 0;
   const borrowed = totalBorrowed ? Number(formatUnits(totalBorrowed as bigint, 18)) : 0;
   const utilization = tvl > 0 ? ((borrowed / tvl) * 100).toFixed(1) : "0.0";
 

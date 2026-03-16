@@ -13,10 +13,10 @@ const POOL_ADDRESS = "0x0000000000000000000000000000000000000000"; // Placeholde
 export default function DashboardPage() {
   const { address, isConnected } = useAccount();
 
-  const { data: totalDeposits } = useReadContract({
+  const { data: totalAssets } = useReadContract({
     address: POOL_ADDRESS,
     abi: CreditPoolABI,
-    functionName: 'totalDeposits',
+    functionName: 'totalAssets',
   });
 
   const { data: totalBorrowed } = useReadContract({
@@ -25,7 +25,7 @@ export default function DashboardPage() {
     functionName: 'totalBorrowed',
   });
 
-  const tvl = totalDeposits ? Number(formatUnits(totalDeposits as bigint, 18)) : 0;
+  const tvl = totalAssets ? Number(formatUnits(totalAssets as bigint, 18)) : 0;
   const borrowed = totalBorrowed ? Number(formatUnits(totalBorrowed as bigint, 18)) : 0;
   const utilization = tvl > 0 ? ((borrowed / tvl) * 100).toFixed(1) : "0.0";
 
