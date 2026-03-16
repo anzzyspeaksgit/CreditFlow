@@ -6,7 +6,8 @@ import { parseUnits, formatUnits } from 'viem';
 import CreditPoolABI from '../../../abis/CreditPool.json';
 import { ShieldCheck, TrendingUp, AlertCircle, BarChart3 } from 'lucide-react';
 
-const POOL_ADDRESS = "0x0000000000000000000000000000000000000000"; // Placeholder
+import { CONTRACT_ADDRESSES } from "../../../config/contracts";
+const POOL_ADDRESS = CONTRACT_ADDRESSES.CREDIT_POOL;
 
 export default function PoolDetailsPage({ params }: { params: { id: string } }) {
   const { isConnected } = useAccount();

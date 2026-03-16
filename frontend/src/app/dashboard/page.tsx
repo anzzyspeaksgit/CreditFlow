@@ -8,7 +8,8 @@ import CreditPoolABI from '../../abis/CreditPool.json';
 import { formatUnits } from 'viem';
 import { motion } from 'framer-motion';
 
-const POOL_ADDRESS = "0x0000000000000000000000000000000000000000"; // Placeholder
+import { CONTRACT_ADDRESSES } from "../../config/contracts";
+const POOL_ADDRESS = CONTRACT_ADDRESSES.CREDIT_POOL;
 
 export default function DashboardPage() {
   const { address, isConnected } = useAccount();
