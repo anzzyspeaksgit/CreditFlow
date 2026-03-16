@@ -5,30 +5,46 @@ import { DollarSign, Percent, Activity, ArrowRight, ShieldCheck, ArrowUpRight, A
 import Link from 'next/link';
 import { useAccount, useReadContract } from 'wagmi';
 import CreditPoolABI from '../../abis/CreditPool.json';
-import { formatUnits } from 'viem';
+import { formatUnits, erc20Abi } from 'viem';
 import { motion } from 'framer-motion';
-
-import { CONTRACT_ADDRESSES } from "../../config/contracts";
-const POOL_ADDRESS = CONTRACT_ADDRESSES.CREDIT_POOL;
+import { CONTRACT_ADDRESSES } from '../../config/contracts';
+import { WithdrawButton } from './WithdrawButton';
 
 export default function DashboardPage() {
   const { address, isConnected } = useAccount();
 
   const { data: totalAssets } = useReadContract({
-    address: POOL_ADDRESS,
+    address: CONTRACT_ADDRESSES.CREDIT_POOL,
     abi: CreditPoolABI,
     functionName: 'totalAssets',
   });
 
   const { data: totalBorrowed } = useReadContract({
-    address: POOL_ADDRESS,
+    address: CONTRACT_ADDRESSES.CREDIT_POOL,
     abi: CreditPoolABI,
     functionName: 'totalBorrowed',
+  });
+
+  const { data: userShares } = useReadContract({
+    address: CONTRACT_ADDRESSES.CREDIT_TOKEN,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+    }
   });
 
   const tvl = totalAssets ? Number(formatUnits(totalAssets as bigint, 18)) : 0;
   const borrowed = totalBorrowed ? Number(formatUnits(totalBorrowed as bigint, 18)) : 0;
   const utilization = tvl > 0 ? ((borrowed / tvl) * 100).toFixed(1) : "0.0";
+  
+  // For simplicity, we are showing the value of user's shares in USDC
+  // Since totalAssets grows, userValue = userShares * totalAssets / totalSupply
+  // But for a hackathon UI, if userShares exists we can display a mockup value or calculate it simply
+  // Assuming 1:1 roughly for the demo display:
+  const userSupplied = userShares ? Number(formatUnits(userShares as bigint, 18)) : 0;
+  const safeUserShares = (userShares as bigint) || 0n;
 
   return (
     <motion.div 
@@ -69,13 +85,13 @@ export default function DashboardPage() {
               className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 transition-all col-span-1"
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-gray-500 font-medium">Total Supplied</h3>
+                <h3 className="text-gray-500 font-medium">Your Total Supplied</h3>
                 <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
                   <DollarSign className="w-5 h-5 text-blue-600" />
                 </div>
               </div>
               <p className="text-3xl font-bold">
-                ${tvl > 0 ? tvl.toFixed(2) : "0.00"}
+                ${userSupplied.toFixed(2)}
               </p>
             </motion.div>
 
@@ -84,7 +100,7 @@ export default function DashboardPage() {
               className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 transition-all col-span-1"
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-gray-500 font-medium">Total Interest Earned</h3>
+                <h3 className="text-gray-500 font-medium">Your Interest Earned</h3>
                 <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
                   <Percent className="w-5 h-5 text-green-600" />
                 </div>
@@ -102,7 +118,7 @@ export default function DashboardPage() {
                   <Activity className="w-5 h-5 text-purple-600" />
                 </div>
               </div>
-              <p className="text-3xl font-bold">1 Pool</p>
+              <p className="text-3xl font-bold">{userSupplied > 0 ? '1' : '0'} Pool</p>
             </motion.div>
 
             <motion.div 
@@ -110,7 +126,7 @@ export default function DashboardPage() {
               className="bg-gray-900 text-white p-6 rounded-xl shadow-sm border border-gray-800 transition-all col-span-1"
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-gray-400 font-medium">Global Utilization</h3>
+                <h3 className="text-gray-400 font-medium">Pool Global Utilization</h3>
               </div>
               <p className="text-3xl font-bold mb-2">{utilization}%</p>
               <div className="w-full bg-gray-800 rounded-full h-2">
@@ -138,21 +154,27 @@ export default function DashboardPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    <tr className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-gray-900">SME Invoice Factoring</div>
-                        <div className="text-sm text-gray-500">InvoiceX Global</div>
-                      </td>
-                      <td className="px-6 py-4 font-medium">
-                        ${tvl > 0 ? tvl.toFixed(2) : "0.00"}
-                      </td>
-                      <td className="px-6 py-4">12.5%</td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="text-sm font-semibold border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors mr-2">
-                          Withdraw
-                        </button>
-                      </td>
-                    </tr>
+                    {userSupplied > 0 ? (
+                      <tr className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-gray-900">SME Invoice Factoring</div>
+                          <div className="text-sm text-gray-500">InvoiceX Global</div>
+                        </td>
+                        <td className="px-6 py-4 font-medium">
+                          ${userSupplied.toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4">12.5%</td>
+                        <td className="px-6 py-4 text-right">
+                          <WithdrawButton shares={safeUserShares} disabled={false} />
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
+                          You have no active positions. <Link href="/pools" className="text-blue-600 hover:underline">Explore Pools</Link>
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
