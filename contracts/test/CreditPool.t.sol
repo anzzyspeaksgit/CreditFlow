@@ -40,7 +40,7 @@ contract CreditPoolTest is Test {
         vm.prank(lender1);
         pool.deposit(1000 * 10 ** 18);
 
-        assertEq(pool.totalDeposits(), 1000 * 10 ** 18);
+        assertEq(pool.totalAssets(), 1000 * 10 ** 18);
         assertEq(poolToken.balanceOf(lender1), 1000 * 10 ** 18);
     }
 

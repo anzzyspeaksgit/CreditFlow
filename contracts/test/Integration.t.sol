@@ -57,7 +57,7 @@ contract IntegrationTest is Test {
         vm.prank(lender2);
         pool.deposit(1000 * 10 ** 18);
         
-        assertEq(pool.totalDeposits(), 2000 * 10 ** 18);
+        assertEq(pool.totalAssets(), 2000 * 10 ** 18);
         assertEq(poolToken.balanceOf(lender1), 1000 * 10 ** 18);
         assertEq(poolToken.balanceOf(lender2), 1000 * 10 ** 18);
 
@@ -68,24 +68,29 @@ contract IntegrationTest is Test {
         assertEq(pool.totalBorrowed(), 1500 * 10 ** 18);
         assertEq(usdc.balanceOf(borrower), 2500 * 10 ** 18); // 1000 initial + 1500 borrowed
 
-        // 3. Borrower repays with interest (say 100 USDC interest)
-        // Note: The simple repay function in CreditPool reduces totalBorrowed.
-        // If they transfer more USDC directly to the pool to simulate interest accrued,
-        // it increases the pool's balance but totalDeposits remains the same until someone deposits/withdraws.
-        // Let's test the simple repay logic first.
+        // 3. Borrower repays with interest (100 USDC interest)
         vm.prank(borrower);
-        pool.repay(1500 * 10 ** 18);
+        pool.repay(1500 * 10 ** 18, 100 * 10 ** 18); // 1500 principal + 100 interest
+        
         assertEq(pool.totalBorrowed(), 0);
+        assertEq(pool.totalAssets(), 2100 * 10 ** 18); // 2000 initial + 100 interest
 
         // 4. Lenders withdraw
+        // Since the pool gained 100 USDC interest without issuing new shares,
+        // each of the 2000 shares is now worth 2100/2000 = 1.05 USDC.
+        // Lender 1 withdraws 1000 shares = 1050 USDC.
         vm.prank(lender1);
         pool.withdraw(1000 * 10 ** 18);
         
-        assertEq(usdc.balanceOf(lender1), 10000 * 10 ** 18); // Full return
+        assertEq(usdc.balanceOf(lender1), 10050 * 10 ** 18); // 9000 remaining + 1050 returned
         
         vm.prank(lender2);
         pool.withdraw(1000 * 10 ** 18);
         
-        assertEq(usdc.balanceOf(lender2), 10000 * 10 ** 18); // Full return
+        assertEq(usdc.balanceOf(lender2), 10050 * 10 ** 18); // 9000 remaining + 1050 returned
+        
+        // Pool should be completely empty
+        assertEq(usdc.balanceOf(address(pool)), 0);
+        assertEq(poolToken.totalSupply(), 0);
     }
 }
