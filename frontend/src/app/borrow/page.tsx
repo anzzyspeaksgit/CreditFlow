@@ -108,80 +108,98 @@ export default function BorrowPage() {
 
   if (isConnected && isApproved) {
     return (
-      <div className="flex flex-col min-h-screen bg-gray-50">
-        <header className="px-6 py-4 flex items-center justify-between border-b bg-white">
+      <div className="flex flex-col min-h-screen text-slate-100 overflow-hidden relative">
+        <div className="fixed inset-0 -z-10">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[128px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-[128px]" />
+        </div>
+
+        <header className="px-6 py-4 flex items-center justify-between border-b border-white/10 bg-white/5 backdrop-blur-xl">
           <div className="flex items-center gap-2">
-            <Briefcase className="w-6 h-6 text-blue-600" />
-            <a href="/" className="text-xl font-bold">CreditFlow</a>
+            <Briefcase className="w-6 h-6 text-purple-400" />
+            <a href="/" className="text-xl font-bold text-white tracking-wide">CreditFlow</a>
           </div>
-          <div className="text-sm font-medium text-gray-500">Active Credit Line</div>
+          <div className="text-sm font-medium text-slate-400 tracking-wider uppercase">Active Credit Line</div>
         </header>
 
-        <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-12">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Borrower Dashboard</h1>
-            <p className="text-gray-500">Manage your active credit lines and repayments.</p>
+        <main className="flex-1 relative z-10 max-w-6xl mx-auto w-full px-6 py-12">
+          <div className="mb-10">
+            <h1 className="text-4xl font-extrabold text-white mb-3">Borrower Dashboard</h1>
+            <p className="text-slate-400 text-lg font-light">Manage your institutional credit lines and active drawdowns.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-              <h3 className="text-lg font-bold mb-6">Drawdown Capital</h3>
-              <div className="mb-6">
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-500">Available Pool Liquidity</span>
-                  <span className="font-medium">{availableLiquidity.toFixed(2)} USDC</span>
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div className="glass-card p-10 rounded-3xl shadow-2xl">
+              <h3 className="text-2xl font-bold text-white mb-8">Drawdown Capital</h3>
+              <div className="mb-8 p-6 bg-black/20 rounded-2xl border border-white/5">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-slate-400 font-medium">Available Pool Liquidity</span>
+                  <span className="text-2xl font-bold text-white">{availableLiquidity.toFixed(2)} <span className="text-sm text-slate-500">USDC</span></span>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-2">
-                  <div className="bg-blue-600 h-2 rounded-full w-full"></div>
+                <div className="w-full bg-white/10 rounded-full h-2.5 overflow-hidden">
+                  <div className="bg-gradient-to-r from-blue-500 to-indigo-400 h-2.5 rounded-full w-full"></div>
                 </div>
               </div>
-              <form onSubmit={handleBorrow} className="space-y-4">
+              <form onSubmit={handleBorrow} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Amount to Borrow (USDC)</label>
-                  <input
-                    type="number"
-                    value={borrowAmount}
-                    onChange={(e) => setBorrowAmount(e.target.value)}
-                    placeholder="0.00"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+                  <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Amount to Borrow</label>
+                  <div className="relative group">
+                    <input
+                      type="number"
+                      value={borrowAmount}
+                      onChange={(e) => setBorrowAmount(e.target.value)}
+                      placeholder="0.00"
+                      className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-white text-xl transition-all group-hover:bg-white/10"
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-5 flex items-center pointer-events-none">
+                      <span className="text-slate-400 font-bold tracking-wider">USDC</span>
+                    </div>
+                  </div>
                 </div>
                 <button
                   type="submit"
                   disabled={!borrowAmount || Number(borrowAmount) > availableLiquidity}
-                  className="w-full bg-black text-white font-medium py-3 rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                  className="w-full premium-button text-white font-bold py-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 text-lg shadow-[0_0_20px_rgba(59,130,246,0.3)]"
                 >
-                  <ArrowDownRight className="w-4 h-4" /> Drawdown Funds
+                  <ArrowDownRight className="w-5 h-5" /> Drawdown Funds
                 </button>
               </form>
             </div>
 
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-              <h3 className="text-lg font-bold mb-6">Make Repayment</h3>
-              <div className="mb-6">
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-500">Global Outstanding Debt</span>
-                  <span className="font-medium text-red-600">{globalBorrowed.toFixed(2)} USDC</span>
+            <div className="glass-card p-10 rounded-3xl shadow-2xl">
+              <h3 className="text-2xl font-bold text-white mb-8">Make Repayment</h3>
+              <div className="mb-8 p-6 bg-black/20 rounded-2xl border border-white/5">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-slate-400 font-medium">Global Outstanding Debt</span>
+                  <span className="text-2xl font-bold text-red-400">{globalBorrowed.toFixed(2)} <span className="text-sm text-slate-500">USDC</span></span>
                 </div>
               </div>
-              <form onSubmit={handleRepay} className="space-y-4">
+              <form onSubmit={handleRepay} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Principal Repayment (USDC)</label>
-                  <input
-                    type="number"
-                    value={repayAmount}
-                    onChange={(e) => setRepayAmount(e.target.value)}
-                    placeholder="0.00"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                  <p className="text-xs text-gray-500 mt-2">Note: A 5% interest fee will be automatically calculated and appended to this repayment for the lenders.</p>
+                  <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Principal Repayment</label>
+                  <div className="relative group">
+                    <input
+                      type="number"
+                      value={repayAmount}
+                      onChange={(e) => setRepayAmount(e.target.value)}
+                      placeholder="0.00"
+                      className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-green-500 outline-none text-white text-xl transition-all group-hover:bg-white/10"
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-5 flex items-center pointer-events-none">
+                      <span className="text-slate-400 font-bold tracking-wider">USDC</span>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 mt-4 text-slate-400 text-sm font-medium bg-black/20 p-3 rounded-lg border border-white/5">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-blue-400" />
+                    <p>A 5% interest fee will be automatically calculated and appended to this repayment for the lenders.</p>
+                  </div>
                 </div>
                 <button
                   type="submit"
                   disabled={!repayAmount}
-                  className="w-full border border-gray-300 bg-white text-gray-900 font-medium py-3 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-white/10 border border-white/20 text-white font-bold py-4 rounded-xl hover:bg-white/20 disabled:opacity-50 transition-all flex items-center justify-center gap-2 text-lg backdrop-blur-md"
                 >
-                  <ArrowUpRight className="w-4 h-4" /> Repay & Accrue Interest
+                  <ArrowUpRight className="w-5 h-5 text-green-400" /> Repay & Accrue Interest
                 </button>
               </form>
             </div>
@@ -192,82 +210,102 @@ export default function BorrowPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <header className="px-6 py-4 flex items-center justify-between border-b bg-white">
+    <div className="flex flex-col min-h-screen text-slate-100 overflow-hidden relative">
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[128px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-[128px]" />
+      </div>
+
+      <header className="px-6 py-4 flex items-center justify-between border-b border-white/10 bg-white/5 backdrop-blur-xl">
         <div className="flex items-center gap-2">
-          <Briefcase className="w-6 h-6 text-blue-600" />
-          <a href="/" className="text-xl font-bold">CreditFlow</a>
+          <Briefcase className="w-6 h-6 text-purple-400" />
+          <a href="/" className="text-xl font-bold text-white tracking-wide">CreditFlow</a>
         </div>
-        <div className="text-sm font-medium text-gray-500">Borrower Portal</div>
+        <div className="text-sm font-medium text-slate-400 tracking-wider uppercase">Borrower Portal</div>
       </header>
 
-      <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-12">
+      <main className="flex-1 relative z-10 max-w-4xl mx-auto w-full px-6 py-12">
         {!isConnected && (
-          <div className="bg-blue-50 text-blue-800 p-4 rounded-lg flex gap-3 items-start mb-6">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-            <p className="text-sm font-medium">Connect your wallet. If you are whitelisted, you will access the active credit line dashboard directly.</p>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-blue-500/10 border border-blue-500/20 text-blue-300 p-5 rounded-2xl flex gap-4 items-start mb-8 backdrop-blur-xl"
+          >
+            <AlertCircle className="w-6 h-6 shrink-0 text-blue-400" />
+            <p className="text-sm font-medium leading-relaxed">Connect your wallet. If you are whitelisted by the risk committee, you will access the active credit line dashboard directly.</p>
+          </motion.div>
         )}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+          className="glass-card rounded-3xl shadow-2xl overflow-hidden"
         >
-          <div className="p-8 border-b border-gray-100 bg-gray-900 text-white">
-            <h1 className="text-3xl font-bold mb-2">Apply for Credit Line</h1>
-            <p className="text-gray-400">Institutional borrowing requires strict KYC, AML, and collateral verification.</p>
+          <div className="p-8 md:p-10 border-b border-white/10 bg-black/40">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-3">Apply for Credit Line</h1>
+            <p className="text-slate-400 font-light text-lg">Institutional borrowing requires strict KYC, AML, and collateral verification.</p>
           </div>
 
-          <div className="p-8">
+          <div className="p-8 md:p-10">
             {step === 1 && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <h2 className="text-xl font-bold mb-6">Step 1: Company Details</h2>
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center font-bold">1</div>
+                  <h2 className="text-2xl font-bold text-white">Company Details</h2>
+                </div>
                 <form onSubmit={() => setStep(2)} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
-                      <input type="text" required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Acme Corp" />
+                      <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Company Name</label>
+                      <input type="text" required className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-white transition-all hover:bg-white/10" placeholder="Acme Corp" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Registration Number</label>
-                      <input type="text" required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="123456789" />
+                      <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Registration Number</label>
+                      <input type="text" required className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-white transition-all hover:bg-white/10" placeholder="123456789" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Requested Credit Limit (USDC)</label>
-                    <input type="number" required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="500,000" />
+                    <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Requested Credit Limit (USDC)</label>
+                    <input type="number" required className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-white transition-all hover:bg-white/10" placeholder="500,000" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Business Description</label>
-                    <textarea required rows={4} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Describe your business model and use of funds..."></textarea>
+                    <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Business Description</label>
+                    <textarea required rows={4} className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-white transition-all hover:bg-white/10 resize-none" placeholder="Describe your business model and use of funds..."></textarea>
                   </div>
-                  <button type="submit" className="w-full bg-blue-600 text-white font-medium py-3 rounded-lg hover:bg-blue-700 transition-colors">
-                    Continue to KYC
-                  </button>
+                  <div className="pt-4">
+                    <button type="submit" className="w-full premium-button text-white font-bold text-lg py-4 rounded-xl shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+                      Continue to KYC
+                    </button>
+                  </div>
                 </form>
               </motion.div>
             )}
 
             {step === 2 && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <h2 className="text-xl font-bold mb-6">Step 2: Documentation & KYC</h2>
-                <div className="bg-blue-50 text-blue-800 p-4 rounded-lg flex gap-3 items-start mb-6">
-                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-                  <p className="text-sm">To comply with international regulations, you must upload audited financials and pass our identity verification process.</p>
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center font-bold">2</div>
+                  <h2 className="text-2xl font-bold text-white">Documentation & KYC</h2>
                 </div>
                 
-                <form onSubmit={handleApply} className="space-y-6">
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer">
-                    <FileText className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-gray-900">Upload Financial Statements</p>
-                    <p className="text-xs text-gray-500 mt-1">PDF, DOCX up to 10MB</p>
+                <div className="bg-blue-500/10 border border-blue-500/20 text-blue-300 p-5 rounded-2xl flex gap-4 items-start mb-8">
+                  <AlertCircle className="w-6 h-6 shrink-0 text-blue-400" />
+                  <p className="text-sm leading-relaxed">To comply with international regulations, you must upload audited financials and pass our identity verification process.</p>
+                </div>
+                
+                <form onSubmit={handleApply} className="space-y-8">
+                  <div className="border-2 border-dashed border-white/20 rounded-2xl p-10 text-center hover:bg-white/5 transition-colors cursor-pointer bg-white/[0.02]">
+                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
+                      <FileText className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <p className="text-lg font-bold text-white">Upload Financial Statements</p>
+                    <p className="text-sm text-slate-500 mt-2 font-medium">PDF, DOCX up to 10MB</p>
                   </div>
                   
-                  <div className="flex gap-4">
-                    <button type="button" onClick={() => setStep(1)} className="w-1/3 bg-gray-100 text-gray-900 font-medium py-3 rounded-lg hover:bg-gray-200 transition-colors">
+                  <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    <button type="button" onClick={() => setStep(1)} className="w-full sm:w-1/3 bg-white/5 border border-white/10 text-white font-bold text-lg py-4 rounded-xl hover:bg-white/10 transition-colors">
                       Back
                     </button>
-                    <button type="submit" disabled={isSubmitting} className="w-2/3 bg-black text-white font-medium py-3 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50">
+                    <button type="submit" disabled={isSubmitting} className="w-full sm:w-2/3 premium-button text-white font-bold text-lg py-4 rounded-xl shadow-[0_0_20px_rgba(139,92,246,0.3)] disabled:opacity-50">
                       {isSubmitting ? 'Submitting Application...' : 'Submit Application'}
                     </button>
                   </div>
@@ -276,15 +314,15 @@ export default function BorrowPage() {
             )}
 
             {step === 3 && (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-8">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle className="w-10 h-10 text-green-600" />
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12">
+                <div className="w-24 h-24 bg-green-500/20 border border-green-500/30 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(74,222,128,0.2)]">
+                  <CheckCircle className="w-12 h-12 text-green-400" />
                 </div>
-                <h2 className="text-2xl font-bold mb-2">Application Submitted!</h2>
-                <p className="text-gray-600 max-w-md mx-auto mb-8">
+                <h2 className="text-3xl font-extrabold text-white mb-4">Application Submitted!</h2>
+                <p className="text-slate-400 max-w-md mx-auto mb-10 text-lg leading-relaxed font-light">
                   Your application for a credit line has been submitted. Our risk committee will review your documents within 48-72 hours.
                 </p>
-                <a href="/" className="text-blue-600 font-medium hover:underline">
+                <a href="/" className="inline-flex items-center justify-center bg-white/10 border border-white/20 text-white px-8 py-4 rounded-xl font-bold hover:bg-white/20 transition-colors backdrop-blur-md">
                   Return to Homepage
                 </a>
               </motion.div>

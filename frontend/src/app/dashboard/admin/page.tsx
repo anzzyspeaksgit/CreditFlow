@@ -5,14 +5,14 @@ import { ShieldCheck, UserCheck, AlertTriangle, Users } from 'lucide-react';
 import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi';
 import CreditPoolABI from '../../../abis/CreditPool.json';
 import { CONTRACT_ADDRESSES } from '../../../config/contracts';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { Briefcase } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { address } = useAccount();
   const [approving, setApproving] = useState<string | null>(null);
   
-  // Real implementation: We'd likely have a backend or subgraph feeding us the list of borrowers.
-  // For the hackathon demo, we hardcode the list and tie the actions to on-chain calls.
-  // We'll allow the admin to approve the "Acme Corp" dummy borrower.
   const MOCK_BORROWER_ADDRESS = "0x0000000000000000000000000000000000000001"; // Generic mock
 
   const [borrowers, setBorrowers] = useState([
@@ -33,7 +33,6 @@ export default function AdminDashboard() {
         args: [borrowerAddress, true],
       });
       
-      // Optimistically update UI
       setBorrowers(prev => prev.map(b => b.id === id ? { ...b, status: 'Approved' } : b));
       setApproving(null);
     } catch (error) {
@@ -52,7 +51,6 @@ export default function AdminDashboard() {
         args: [borrowerAddress, false],
       });
       
-      // Optimistically update UI
       setBorrowers(prev => prev.map(b => b.id === id ? { ...b, status: 'Pending Review' } : b));
       setApproving(null);
     } catch (error) {
@@ -62,102 +60,131 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
-      <div className="mb-8 flex justify-between items-end">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Risk & Admin Dashboard</h1>
-          <p className="text-gray-500">Manage KYC, borrowers, and global risk metrics.</p>
-        </div>
+    <div className="flex flex-col min-h-screen text-slate-100 overflow-hidden relative">
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[128px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-[128px]" />
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6 mb-12">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-gray-500 font-medium">Verified Borrowers</h3>
-            <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-              <UserCheck className="w-5 h-5 text-green-600" />
-            </div>
+      <header className="px-6 py-4 flex items-center justify-between border-b border-white/10 bg-white/5 backdrop-blur-xl">
+        <div className="flex items-center gap-2">
+          <Briefcase className="w-6 h-6 text-purple-400" />
+          <Link href="/" className="text-xl font-bold text-white tracking-wide">CreditFlow</Link>
+        </div>
+        <div className="text-sm font-medium text-slate-400 tracking-wider uppercase">Admin Portal</div>
+      </header>
+
+      <motion.main 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex-1 max-w-6xl mx-auto w-full px-6 py-12 relative z-10"
+      >
+        <div className="mb-10 flex justify-between items-end">
+          <div>
+            <h1 className="text-4xl font-extrabold text-white mb-3">Risk & Admin Dashboard</h1>
+            <p className="text-slate-400 text-lg font-light">Manage KYC verifications, borrowers, and global risk metrics.</p>
           </div>
-          <p className="text-3xl font-bold">
-            {borrowers.filter(b => b.status === 'Approved').length}
-          </p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-gray-500 font-medium">Pending Applications</h3>
-            <div className="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center">
-              <Users className="w-5 h-5 text-yellow-600" />
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="glass-card p-8 rounded-3xl shadow-2xl transition-all"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-slate-400 font-medium">Verified Borrowers</h3>
+              <div className="w-14 h-14 bg-green-500/10 rounded-xl flex items-center justify-center border border-green-500/20">
+                <UserCheck className="w-7 h-7 text-green-400" />
+              </div>
             </div>
-          </div>
-          <p className="text-3xl font-bold">
-            {borrowers.filter(b => b.status === 'Pending Review').length}
-          </p>
+            <p className="text-5xl font-bold text-white">
+              {borrowers.filter(b => b.status === 'Approved').length}
+            </p>
+          </motion.div>
+
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="glass-card p-8 rounded-3xl shadow-2xl transition-all"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-slate-400 font-medium">Pending Applications</h3>
+              <div className="w-14 h-14 bg-yellow-500/10 rounded-xl flex items-center justify-center border border-yellow-500/20">
+                <Users className="w-7 h-7 text-yellow-400" />
+              </div>
+            </div>
+            <p className="text-5xl font-bold text-yellow-400">
+              {borrowers.filter(b => b.status === 'Pending Review').length}
+            </p>
+          </motion.div>
+
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="glass-card p-8 rounded-3xl shadow-2xl transition-all"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-slate-400 font-medium">Global Risk Alerts</h3>
+              <div className="w-14 h-14 bg-red-500/10 rounded-xl flex items-center justify-center border border-red-500/20">
+                <AlertTriangle className="w-7 h-7 text-red-400" />
+              </div>
+            </div>
+            <p className="text-5xl font-bold text-red-400">0</p>
+          </motion.div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-gray-500 font-medium">Global Risk Alerts</h3>
-            <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-red-600" />
-            </div>
-          </div>
-          <p className="text-3xl font-bold">0</p>
-        </div>
-      </div>
-
-      <h2 className="text-xl font-bold mb-6">Borrower Management (KYC)</h2>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-12">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-4 font-semibold text-gray-600">Company</th>
-              <th className="px-6 py-4 font-semibold text-gray-600">Registration</th>
-              <th className="px-6 py-4 font-semibold text-gray-600">Credit Limit</th>
-              <th className="px-6 py-4 font-semibold text-gray-600">Status</th>
-              <th className="px-6 py-4 font-semibold text-gray-600 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {borrowers.map((b) => (
-              <tr key={b.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 font-bold text-gray-900">{b.name}</td>
-                <td className="px-6 py-4 text-gray-600">{b.reg}</td>
-                <td className="px-6 py-4 font-medium">{b.limit}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                    b.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                  }`}>
-                    {b.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  {b.status === 'Pending Review' ? (
-                    <button 
-                      onClick={() => handleApprove(b.id, b.address)}
-                      disabled={approving === b.id}
-                      className="text-sm font-semibold bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 disabled:opacity-50"
-                    >
-                      {approving === b.id ? 'Confirming in Wallet...' : 'Approve Borrower'}
-                    </button>
-                  ) : (
-                    <button 
-                      onClick={() => handleRevoke(b.id, b.address)}
-                      disabled={approving === b.id}
-                      className="text-sm font-semibold border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 text-red-600 hover:text-red-700 disabled:opacity-50"
-                    >
-                      {approving === b.id ? 'Processing...' : 'Revoke'}
-                    </button>
-                  )}
-                </td>
+        <h2 className="text-2xl font-bold mb-6 text-white">Borrower Management (KYC)</h2>
+        <div className="glass-card rounded-3xl shadow-2xl overflow-hidden mb-12">
+          <table className="w-full text-left border-collapse">
+            <thead className="border-b border-white/10 bg-white/5">
+              <tr>
+                <th className="px-8 py-5 font-semibold text-slate-400 text-sm tracking-wider uppercase">Company</th>
+                <th className="px-8 py-5 font-semibold text-slate-400 text-sm tracking-wider uppercase">Registration</th>
+                <th className="px-8 py-5 font-semibold text-slate-400 text-sm tracking-wider uppercase">Credit Limit</th>
+                <th className="px-8 py-5 font-semibold text-slate-400 text-sm tracking-wider uppercase">Status</th>
+                <th className="px-8 py-5 font-semibold text-slate-400 text-sm tracking-wider uppercase text-right">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="text-center text-sm text-gray-500">
-        <p>Note: In a production environment, this dashboard is heavily restricted via OpenZeppelin's `AccessControl` and `Ownable` contracts.</p>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {borrowers.map((b) => (
+                <tr key={b.id} className="hover:bg-white/5 transition-colors group">
+                  <td className="px-8 py-6 font-bold text-white text-base group-hover:text-purple-300 transition-colors">{b.name}</td>
+                  <td className="px-8 py-6 text-slate-400">{b.reg}</td>
+                  <td className="px-8 py-6 font-medium text-white text-lg">{b.limit}</td>
+                  <td className="px-8 py-6">
+                    <span className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider ${
+                      b.status === 'Approved' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+                    }`}>
+                      {b.status}
+                    </span>
+                  </td>
+                  <td className="px-8 py-6 text-right">
+                    {b.status === 'Pending Review' ? (
+                      <button 
+                        onClick={() => handleApprove(b.id, b.address)}
+                        disabled={approving === b.id}
+                        className="text-sm font-bold bg-white text-black px-6 py-3 rounded-xl hover:bg-slate-200 transition-all disabled:opacity-50"
+                      >
+                        {approving === b.id ? 'Confirming in Wallet...' : 'Approve Borrower'}
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => handleRevoke(b.id, b.address)}
+                        disabled={approving === b.id}
+                        className="text-sm font-bold border border-red-500/30 bg-red-500/10 text-red-400 px-6 py-3 rounded-xl hover:bg-red-500/20 transition-all disabled:opacity-50"
+                      >
+                        {approving === b.id ? 'Processing...' : 'Revoke Access'}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="text-center text-sm text-slate-500 max-w-2xl mx-auto bg-black/20 p-4 rounded-xl border border-white/5">
+          <p>Note: In a production environment, this dashboard is heavily restricted via OpenZeppelin's <code className="font-mono text-purple-400">AccessControl</code> and <code className="font-mono text-purple-400">Ownable</code> contracts.</p>
+        </div>
+      </motion.main>
     </div>
   );
 }
