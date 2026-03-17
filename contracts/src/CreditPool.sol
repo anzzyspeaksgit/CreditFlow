@@ -44,9 +44,9 @@ contract CreditPool is Ownable, ReentrancyGuard {
 
     function getCollateralValue(address borrower) public view returns (uint256) {
         if (address(priceFeed) == address(0)) return 0;
-        (, int256 price, , , ) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.latestRoundData();
         require(price > 0, "Invalid oracle price");
-        
+
         // Assuming price has 8 decimals (standard for USD pairs on Chainlink)
         // Collateral amount is assuming 18 decimals
         // Value in USDC (18 decimals) = collateralAmount * price / 10^8
@@ -68,8 +68,8 @@ contract CreditPool is Ownable, ReentrancyGuard {
         require(amount > 0, "Amount must be > 0");
 
         uint256 _totalAssets = totalAssets();
-        uint256 shares = amount; 
-        
+        uint256 shares = amount;
+
         if (poolToken.totalSupply() > 0 && _totalAssets > 0) {
             shares = (amount * poolToken.totalSupply()) / _totalAssets;
         }
@@ -82,7 +82,7 @@ contract CreditPool is Ownable, ReentrancyGuard {
 
     function withdraw(uint256 shares) external nonReentrant {
         require(shares > 0, "Shares must be > 0");
-        
+
         uint256 amount = (shares * totalAssets()) / poolToken.totalSupply();
         require(usdc.balanceOf(address(this)) >= amount, "Insufficient liquidity");
 
@@ -95,7 +95,7 @@ contract CreditPool is Ownable, ReentrancyGuard {
     function borrow(uint256 amount) external nonReentrant {
         require(borrowers[msg.sender].isApproved, "Not approved");
         require(usdc.balanceOf(address(this)) >= amount, "Insufficient liquidity");
-        
+
         if (address(priceFeed) != address(0)) {
             uint256 collateralValue = getCollateralValue(msg.sender);
             // Simple LTV check: Max borrow 80% of collateral value
@@ -110,7 +110,7 @@ contract CreditPool is Ownable, ReentrancyGuard {
 
     function repay(uint256 principal, uint256 interest) external nonReentrant {
         require(principal > 0 || interest > 0, "Must repay something");
-        
+
         uint256 totalRepay = principal + interest;
         usdc.transferFrom(msg.sender, address(this), totalRepay);
 

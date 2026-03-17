@@ -25,12 +25,22 @@ contract MockOracle is AggregatorV3Interface {
         price = _price;
     }
 
-    function decimals() external pure returns (uint8) { return 8; }
-    function description() external pure returns (string memory) { return "Mock Oracle"; }
-    function version() external pure returns (uint256) { return 1; }
+    function decimals() external pure returns (uint8) {
+        return 8;
+    }
+
+    function description() external pure returns (string memory) {
+        return "Mock Oracle";
+    }
+
+    function version() external pure returns (uint256) {
+        return 1;
+    }
+
     function getRoundData(uint80) external view returns (uint80, int256, uint256, uint256, uint80) {
         return (1, price, block.timestamp, block.timestamp, 1);
     }
+
     function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80) {
         return (1, price, block.timestamp, block.timestamp, 1);
     }
