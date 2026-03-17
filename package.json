@@ -1,0 +1,13 @@
+{
+  "name": "creditflow-root",
+  "version": "1.0.0",
+  "description": "CreditFlow - Institutional Private Credit on BNB Chain",
+  "scripts": {
+    "install": "cd frontend && npm install --legacy-peer-deps && cd ../contracts && forge install",
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build && cd ../contracts && forge build",
+    "test": "cd contracts && forge test -vvv"
+  },
+  "author": "CreditFlow Team",
+  "license": "MIT"
+}
