@@ -5,6 +5,7 @@ import "forge-std/Script.sol";
 import "../src/CreditPool.sol";
 import "../src/CreditToken.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "../src/interfaces/AggregatorV3Interface.sol";
 
 // Mock USDC for testnet deployment
 contract MockUSDC is ERC20 {
@@ -17,6 +18,24 @@ contract MockUSDC is ERC20 {
     }
 }
 
+contract MockOracle is AggregatorV3Interface {
+    int256 public price = 2000 * 10 ** 8; // $2000 per unit (e.g. Gold or ETH)
+
+    function setPrice(int256 _price) external {
+        price = _price;
+    }
+
+    function decimals() external pure returns (uint8) { return 8; }
+    function description() external pure returns (string memory) { return "Mock Oracle"; }
+    function version() external pure returns (uint256) { return 1; }
+    function getRoundData(uint80) external view returns (uint80, int256, uint256, uint256, uint80) {
+        return (1, price, block.timestamp, block.timestamp, 1);
+    }
+    function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80) {
+        return (1, price, block.timestamp, block.timestamp, 1);
+    }
+}
+
 contract DeployScript is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -26,15 +45,19 @@ contract DeployScript is Script {
         MockUSDC usdc = new MockUSDC();
         console.log("Mock USDC deployed at:", address(usdc));
 
-        // 2. Deploy Credit Token
+        // 2. Deploy Mock Oracle
+        MockOracle oracle = new MockOracle();
+        console.log("Mock Oracle deployed at:", address(oracle));
+
+        // 3. Deploy Credit Token
         CreditToken cflowToken = new CreditToken();
         console.log("CreditToken (CFLOW) deployed at:", address(cflowToken));
 
-        // 3. Deploy Credit Pool
-        CreditPool pool = new CreditPool(address(usdc), address(cflowToken));
+        // 4. Deploy Credit Pool
+        CreditPool pool = new CreditPool(address(usdc), address(cflowToken), address(oracle));
         console.log("CreditPool deployed at:", address(pool));
 
-        // 4. Setup permissions
+        // 5. Setup permissions
         cflowToken.setPool(address(pool));
         console.log("CreditToken pool set to CreditPool");
 
