@@ -47,7 +47,7 @@ contract CreditPool is Ownable, ReentrancyGuard {
 
         uint256 _totalAssets = totalAssets();
         uint256 shares = amount; // 1:1 for first deposit
-        
+
         if (poolToken.totalSupply() > 0 && _totalAssets > 0) {
             shares = (amount * poolToken.totalSupply()) / _totalAssets;
         }
@@ -61,7 +61,7 @@ contract CreditPool is Ownable, ReentrancyGuard {
 
     function withdraw(uint256 shares) external nonReentrant {
         require(shares > 0, "Shares must be > 0");
-        
+
         uint256 amount = (shares * totalAssets()) / poolToken.totalSupply();
         require(usdc.balanceOf(address(this)) >= amount, "Insufficient liquidity");
 
@@ -83,7 +83,7 @@ contract CreditPool is Ownable, ReentrancyGuard {
 
     function repay(uint256 principal, uint256 interest) external nonReentrant {
         require(principal > 0 || interest > 0, "Must repay something");
-        
+
         uint256 totalRepay = principal + interest;
         usdc.transferFrom(msg.sender, address(this), totalRepay);
 

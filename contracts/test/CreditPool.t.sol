@@ -28,7 +28,7 @@ contract CreditPoolTest is Test {
         usdc = new MockUSDC();
         poolToken = new CreditToken();
         pool = new CreditPool(address(usdc), address(poolToken));
-        
+
         poolToken.setPool(address(pool));
 
         usdc.mint(lender1, 10000 * 10 ** 18);

@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { DollarSign, Percent, Activity, ArrowRight, ShieldCheck, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { DollarSign, Percent, Activity, ArrowRight, ShieldCheck, ArrowUpRight, ArrowDownRight, Briefcase } from 'lucide-react';
 import Link from 'next/link';
 import { useAccount, useReadContract } from 'wagmi';
 import CreditPoolABI from '../../abis/CreditPool.json';
